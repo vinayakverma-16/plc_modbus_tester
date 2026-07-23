@@ -109,19 +109,27 @@ class MainWindow(QMainWindow):
         self._connection_dock = QDockWidget("Connection", self)
         self._connection_panel = ConnectionPanel()
         self._connection_dock.setWidget(self._connection_panel)
-        self._connection_dock.setFeatures(QDockWidget.DockWidgetMovable | QDockWidget.DockWidgetFloatable)
+        dock_flags = QDockWidget.DockWidgetMovable | QDockWidget.DockWidgetFloatable | QDockWidget.DockWidgetClosable | QDockWidget.DockWidgetResizable
+
+        self._connection_dock = QDockWidget("Connection", self)
+        self._connection_panel = ConnectionPanel()
+        self._connection_dock.setWidget(self._connection_panel)
+        self._connection_dock.setFeatures(dock_flags)
+        self._connection_dock.setMinimumWidth(200)
         self.addDockWidget(Qt.LeftDockWidgetArea, self._connection_dock)
 
         self._packet_dock = QDockWidget("Packet Monitor", self)
         self._packet_monitor = PacketMonitor()
         self._packet_dock.setWidget(self._packet_monitor)
-        self._packet_dock.setFeatures(QDockWidget.DockWidgetMovable | QDockWidget.DockWidgetFloatable)
+        self._packet_dock.setFeatures(dock_flags)
+        self._packet_dock.setMinimumHeight(100)
         self.addDockWidget(Qt.BottomDockWidgetArea, self._packet_dock)
 
         self._calc_dock = QDockWidget("Calculator", self)
         self._calc_panel = CalculatorPanel()
         self._calc_dock.setWidget(self._calc_panel)
-        self._calc_dock.setFeatures(QDockWidget.DockWidgetMovable | QDockWidget.DockWidgetFloatable)
+        self._calc_dock.setFeatures(dock_flags)
+        self._calc_dock.setMinimumWidth(250)
         self.addDockWidget(Qt.RightDockWidgetArea, self._calc_dock)
 
         self._tools_dock = QDockWidget("Tools", self)
@@ -137,7 +145,7 @@ class MainWindow(QMainWindow):
         self._tools_tabs.addTab(self._logging_panel, "Logging")
         self._tools_tabs.addTab(self._utility_panel, "Utilities")
         self._tools_dock.setWidget(self._tools_tabs)
-        self._tools_dock.setFeatures(QDockWidget.DockWidgetMovable | QDockWidget.DockWidgetFloatable)
+        self._tools_dock.setFeatures(dock_flags)
         self.addDockWidget(Qt.RightDockWidgetArea, self._tools_dock)
 
         self.tabifyDockWidget(self._calc_dock, self._tools_dock)
