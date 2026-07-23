@@ -109,7 +109,7 @@ class MainWindow(QMainWindow):
         self._connection_dock = QDockWidget("Connection", self)
         self._connection_panel = ConnectionPanel()
         self._connection_dock.setWidget(self._connection_panel)
-        dock_flags = QDockWidget.DockWidgetMovable | QDockWidget.DockWidgetFloatable | QDockWidget.DockWidgetClosable | QDockWidget.DockWidgetResizable
+        dock_flags = QDockWidget.DockWidgetMovable | QDockWidget.DockWidgetFloatable | QDockWidget.DockWidgetClosable
 
         self._connection_dock = QDockWidget("Connection", self)
         self._connection_panel = ConnectionPanel()
