@@ -19,12 +19,34 @@ find_python() {
     return 1
 }
 
+install_pyenv_python() {
+    echo "No Python $MIN_PYTHON+ found on this system."
+
+    if ! command -v pyenv &>/dev/null; then
+        echo "Installing pyenv..."
+        sudo apt install -y make build-essential libssl-dev zlib1g-dev \
+            libbz2-dev libreadline-dev libsqlite3-dev wget curl \
+            libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev
+        curl https://pyenv.run | bash
+        export PYENV_ROOT="$HOME/.pyenv"
+        export PATH="$PYENV_ROOT/bin:$PATH"
+        eval "$(pyenv init -)"
+    fi
+
+    echo "Installing Python 3.12.7 via pyenv (this compiles from source, may take a few minutes)..."
+    pyenv install 3.12.7 -s
+    pyenv local 3.12.7
+    echo "pyenv Python: $(python --version)"
+    echo "$(which python)"
+}
+
 PYTHON=$(find_python) || {
-    echo "Error: Python $MIN_PYTHON+ is required."
-    echo "Install it via:"
-    echo "  sudo apt install python3.12 python3.12-venv python3.12-pip"
-    echo "Then re-run this script with: PYTHON=python3.12 ./install.sh"
-    exit 1
+    install_pyenv_python
+    PYTHON=$(find_python) || {
+        echo "Error: could not find or install Python $MIN_PYTHON+."
+        echo "Manually run: pyenv install 3.12.7 && pyenv local 3.12.7"
+        exit 1
+    }
 }
 
 echo "Using: $($PYTHON --version)"
