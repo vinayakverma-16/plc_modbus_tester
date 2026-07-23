@@ -99,6 +99,11 @@ echo "Installing dependencies..."
 pip install -r requirements.txt
 
 echo ""
+echo "Checking system dependencies for PySide6..."
+if command -v apt &>/dev/null; then
+    sudo apt install -y libxcb-cursor0 2>/dev/null || sudo apt install -y libxcb-cursor-dev 2>/dev/null || true
+fi
+
 echo "Verifying installation..."
 if python -c "import PySide6; print(f'PySide6 {PySide6.__version__}')" && \
    python -c "import pymodbus; print(f'pymodbus {pymodbus.__version__}')" && \
