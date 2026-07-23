@@ -22,6 +22,12 @@ find_python() {
 install_pyenv_python() {
     echo "No Python $MIN_PYTHON+ found on this system."
 
+    if [ ! -w "$DIR" ]; then
+        echo "ERROR: No write permission in $DIR"
+        echo "Fix with: sudo chown -R $(whoami):$(whoami) \"$DIR\""
+        exit 1
+    fi
+
     if ! command -v pyenv &>/dev/null; then
         echo "Installing pyenv..."
         sudo apt install -y make build-essential libssl-dev zlib1g-dev \
