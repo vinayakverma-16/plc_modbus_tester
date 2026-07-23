@@ -142,10 +142,25 @@ QDockWidget {
 }
 
 QDockWidget::title {
-    background-color: #2d2d2d;
-    color: #d4d4d4;
-    padding: 4px;
-    border-bottom: 1px solid #3c3c3c;
+    background: #2a2d3a;
+    padding: 4px 8px;
+    font-weight: bold;
+    border-bottom: 2px solid #3d86c6;
+}
+
+QDockWidget::close-button, QDockWidget::float-button {
+    border: none;
+    padding: 2px;
+}
+
+QMainWindow::separator {
+    background: #3d86c6;
+    width: 4px;
+    height: 4px;
+}
+
+QMainWindow::separator:hover {
+    background: #5ba3e0;
 }
 
 QStatusBar {

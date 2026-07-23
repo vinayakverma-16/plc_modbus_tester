@@ -37,6 +37,7 @@ class MainWindow(QMainWindow):
         self._build_toolbar()
         self._build_central_area()
         self._build_dock_widgets()
+        self._default_state = self.saveState()
         self._build_status_bar()
         self._connect_signals()
         self._apply_theme()
@@ -57,9 +58,17 @@ class MainWindow(QMainWindow):
         file_menu.addAction(exit_act)
 
         view_menu = menubar.addMenu("&View")
+        toolbar_act = QAction("Toggle Toolbar", self, checkable=True)
+        toolbar_act.setChecked(True)
+        toolbar_act.triggered.connect(lambda v: self._toolbar.setVisible(v))
+        view_menu.addAction(toolbar_act)
+        view_menu.addSeparator()
         theme_act = QAction("Toggle Dark/Light", self, shortcut="Ctrl+T")
         theme_act.triggered.connect(self._toggle_theme)
         view_menu.addAction(theme_act)
+        restore_act = QAction("Restore Default Layout", self)
+        restore_act.triggered.connect(self._restore_layout)
+        view_menu.addAction(restore_act)
 
         help_menu = menubar.addMenu("&Help")
         about_act = QAction("About", self)
@@ -67,37 +76,37 @@ class MainWindow(QMainWindow):
         help_menu.addAction(about_act)
 
     def _build_toolbar(self) -> None:
-        toolbar = QToolBar("Main")
-        toolbar.setMovable(False)
-        self.addToolBar(toolbar)
+        self._toolbar = QToolBar("Main")
+        self._toolbar.setMovable(True)
+        self.addToolBar(self._toolbar)
 
         self._connect_btn = QPushButton("Connect")
         self._connect_btn.setMinimumWidth(100)
-        toolbar.addWidget(self._connect_btn)
+        self._toolbar.addWidget(self._connect_btn)
 
         self._disconnect_btn = QPushButton("Disconnect")
         self._disconnect_btn.setMinimumWidth(100)
         self._disconnect_btn.setEnabled(False)
-        toolbar.addWidget(self._disconnect_btn)
+        self._toolbar.addWidget(self._disconnect_btn)
 
-        toolbar.addSeparator()
+        self._toolbar.addSeparator()
 
         self._poll_btn = QPushButton("Start Poll")
         self._poll_btn.setMinimumWidth(100)
         self._poll_btn.setEnabled(False)
-        toolbar.addWidget(self._poll_btn)
+        self._toolbar.addWidget(self._poll_btn)
 
         self._read_once_btn = QPushButton("Read Once")
         self._read_once_btn.setMinimumWidth(100)
         self._read_once_btn.setEnabled(False)
-        toolbar.addWidget(self._read_once_btn)
+        self._toolbar.addWidget(self._read_once_btn)
 
-        toolbar.addSeparator()
+        self._toolbar.addSeparator()
 
         self._stop_poll_btn = QPushButton("Stop Poll")
         self._stop_poll_btn.setMinimumWidth(100)
         self._stop_poll_btn.setEnabled(False)
-        toolbar.addWidget(self._stop_poll_btn)
+        self._toolbar.addWidget(self._stop_poll_btn)
 
     def _build_central_area(self) -> None:
         self._tab_widget = QTabWidget()
@@ -106,9 +115,6 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self._tab_widget)
 
     def _build_dock_widgets(self) -> None:
-        self._connection_dock = QDockWidget("Connection", self)
-        self._connection_panel = ConnectionPanel()
-        self._connection_dock.setWidget(self._connection_panel)
         dock_flags = QDockWidget.DockWidgetMovable | QDockWidget.DockWidgetFloatable | QDockWidget.DockWidgetClosable
 
         self._connection_dock = QDockWidget("Connection", self)
@@ -151,6 +157,22 @@ class MainWindow(QMainWindow):
         self.tabifyDockWidget(self._calc_dock, self._tools_dock)
         self._calc_dock.raise_()
 
+        self.setDockOptions(
+            QMainWindow.AllowTabbedDocks |
+            QMainWindow.AllowNestedDocks |
+            QMainWindow.AnimatedDocks
+        )
+
+        self.resizeDocks(
+            [self._connection_dock], [230], Qt.Horizontal
+        )
+        self.resizeDocks(
+            [self._calc_dock], [320], Qt.Horizontal
+        )
+        self.resizeDocks(
+            [self._packet_dock], [180], Qt.Vertical
+        )
+
     def _build_status_bar(self) -> None:
         self._status_label = QLabel("Disconnected")
         self._conn_stats_label = QLabel("TX: 0  RX: 0  Err: 0")
@@ -187,6 +209,9 @@ class MainWindow(QMainWindow):
                 qApp = QApplication.instance()
                 if qApp:
                     qApp.setStyleSheet(f.read())
+
+    def _restore_layout(self) -> None:
+        self.restoreState(self._default_state)
 
     @Slot()
     def _toggle_theme(self) -> None:

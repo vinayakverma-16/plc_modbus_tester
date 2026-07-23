@@ -136,6 +136,28 @@ QTabBar::tab:hover {
     background-color: #e0e0e0;
 }
 
+QDockWidget::title {
+    background: #e8e8e8;
+    padding: 4px 8px;
+    font-weight: bold;
+    border-bottom: 2px solid #0078d4;
+}
+
+QDockWidget::close-button, QDockWidget::float-button {
+    border: none;
+    padding: 2px;
+}
+
+QMainWindow::separator {
+    background: #0078d4;
+    width: 4px;
+    height: 4px;
+}
+
+QMainWindow::separator:hover {
+    background: #4ba3e0;
+}
+
 QStatusBar {
     background-color: #0078d4;
     color: white;
