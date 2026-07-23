@@ -1,8 +1,10 @@
 import random
+from collections import deque
+
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QFormLayout, QGroupBox,
     QPushButton, QSpinBox, QLineEdit, QLabel, QCheckBox,
-    QGridLayout, QTextEdit,
+    QGridLayout, QTextEdit, QTableWidget, QTableWidgetItem, QHeaderView,
 )
 from PySide6.QtCore import Signal, QTimer
 
@@ -16,6 +18,7 @@ class PLCTestingPanel(QWidget):
         self._stress_timer = QTimer(self)
         self._stress_timer.timeout.connect(self._stress_step)
         self._stress_count = 0
+        self._write_history: deque = deque(maxlen=50)
         self._build_ui()
 
     def _build_ui(self) -> None:
@@ -41,10 +44,14 @@ class PLCTestingPanel(QWidget):
         val_row.addWidget(QLabel("Value:"))
         val_row.addWidget(self._write_val)
         self._write_btn = QPushButton("Write Register (FC06)")
-        self._write_btn.clicked.connect(lambda: self.write_register_requested.emit(
+        self._write_btn.clicked.connect(lambda: self._emit_write(
             self._force_addr.value(), self._write_val.value()))
         val_row.addWidget(self._write_btn)
         fl.addRow(val_row)
+
+        undo_btn = QPushButton("Undo Last Write")
+        undo_btn.clicked.connect(self._undo_last_write)
+        fl.addRow(undo_btn)
 
         layout.addWidget(force_group)
 
@@ -66,6 +73,17 @@ class PLCTestingPanel(QWidget):
         random_btn.clicked.connect(self._random_generator)
         inc_grid.addWidget(random_btn, 3, 0, 1, 2)
         layout.addWidget(inc_group)
+
+        bulk_group = QGroupBox("Bulk Write")
+        bulk_layout = QVBoxLayout(bulk_group)
+        self._bulk_table = QTableWidget(5, 3)
+        self._bulk_table.setHorizontalHeaderLabels(["Address", "Value", "FC"])
+        self._bulk_table.horizontalHeader().setStretchLastSection(True)
+        bulk_execute_btn = QPushButton("Execute All Writes")
+        bulk_execute_btn.clicked.connect(self._bulk_write)
+        bulk_layout.addWidget(self._bulk_table)
+        bulk_layout.addWidget(bulk_execute_btn)
+        layout.addWidget(bulk_group)
 
         stress_group = QGroupBox("Stress Test")
         stress_fl = QFormLayout(stress_group)
@@ -97,24 +115,53 @@ class PLCTestingPanel(QWidget):
 
         layout.addStretch()
 
+    def _emit_write(self, address: int, value: int) -> None:
+        self._write_history.append((address, value))
+        self.write_register_requested.emit(address, value)
+        self._log(f"Write: addr=0x{address:04X} val={value} (0x{value:04X})")
+
+    def _undo_last_write(self) -> None:
+        if self._write_history:
+            addr, val = self._write_history.pop()
+            self._log(f"Undo: re-writing addr=0x{addr:04X} -> 0")
+            self.write_register_requested.emit(addr, 0)
+        else:
+            self._log("No writes to undo")
+
     def _toggle_coil(self) -> None:
         addr = self._force_addr.value()
         self.write_coil_requested.emit(addr, True)
-        self._log(f"Toggled coil at {addr}")
+        self._log(f"Toggled coil at 0x{addr:04X}")
 
     def _increment_values(self) -> None:
         start = self._inc_addr.value()
         count = self._inc_count.value()
         for i in range(count):
-            self.write_register_requested.emit(start + i, i)
-        self._log(f"Incremented {count} registers from {start}")
+            self._emit_write(start + i, i)
+        self._log(f"Incremented {count} registers from 0x{start:04X}")
 
     def _random_generator(self) -> None:
         start = self._inc_addr.value()
         count = self._inc_count.value()
         for i in range(count):
-            self.write_register_requested.emit(start + i, random.randint(0, 65535))
-        self._log(f"Random values written to {count} registers from {start}")
+            self._emit_write(start + i, random.randint(0, 65535))
+        self._log(f"Random values written to {count} registers from 0x{start:04X}")
+
+    def _bulk_write(self) -> None:
+        count = 0
+        for row in range(self._bulk_table.rowCount()):
+            addr_item = self._bulk_table.item(row, 0)
+            val_item = self._bulk_table.item(row, 1)
+            if addr_item and val_item and addr_item.text() and val_item.text():
+                try:
+                    addr = int(addr_item.text(), 0)
+                    val = int(val_item.text(), 0)
+                    self._emit_write(addr, val)
+                    count += 1
+                except ValueError:
+                    self._log(f"Row {row + 1}: invalid entry - skipped")
+        if count:
+            self._log(f"Bulk write: {count} registers written")
 
     def _start_stress(self) -> None:
         self._stress_count = 0
@@ -127,7 +174,7 @@ class PLCTestingPanel(QWidget):
         self._stress_count += 1
         addr = random.randint(0, 100)
         val = random.randint(0, 65535)
-        self.write_register_requested.emit(addr, val)
+        self._emit_write(addr, val)
         if self._stress_count >= self._stress_count_spin.value():
             self._stop_stress()
             self._log(f"Stress test completed: {self._stress_count} writes")

@@ -146,6 +146,7 @@ class ModbusWorker(QThread):
         if not self._client or not self._client.is_socket_open():
             return []
         settings = self._poll_settings
+        t0 = time.perf_counter()
         try:
             result = None
             if settings.function_code == ModbusFunction.READ_HOLDING_REGISTERS:
@@ -167,6 +168,7 @@ class ModbusWorker(QThread):
 
             if result and not result.isError():
                 self._stats.packets_received += 1
+                self._stats.latency_ms = (time.perf_counter() - t0) * 1000
                 self.stats_updated.emit(self._stats)
                 registers = []
                 now = datetime.now().strftime("%H:%M:%S.%f")[:12]

@@ -3,12 +3,17 @@ from PySide6.QtWidgets import (
     QPushButton, QLineEdit, QLabel, QSpinBox, QComboBox, QTextEdit,
     QFormLayout,
 )
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
 
 
 class BitToolPanel(QWidget):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
+        self._current_value = 0
+        self._build_ui()
+
+    def _build_ui(self) -> None:
         layout = QVBoxLayout(self)
 
         input_group = QGroupBox("Input")
@@ -31,16 +36,29 @@ class BitToolPanel(QWidget):
 
         bit_group = QGroupBox("Bit Viewer")
         bit_layout = QGridLayout(bit_group)
+        for i in range(16):
+            lbl = QLabel(str(15 - i))
+            lbl.setAlignment(Qt.AlignCenter)
+            lbl.setFont(QFont("Consolas", 7))
+            lbl.setStyleSheet("color: #888;")
+            bit_layout.addWidget(lbl, 0, i)
+
         self._bit_buttons: list[QPushButton] = []
         for i in range(64):
             btn = QPushButton("0")
-            btn.setFixedSize(32, 24)
+            btn.setFixedSize(34, 26)
             btn.setFont(QFont("Consolas", 8))
             btn.clicked.connect(lambda checked, b=i: self._toggle_bit(b))
             self._bit_buttons.append(btn)
-            row = i // 16
+            row = 1 + (i // 16) * 2
             col = i % 16
             bit_layout.addWidget(btn, row, col)
+            sep = QLabel("|" if i % 8 == 7 and i % 16 != 15 else "")
+            if sep.text():
+                sep.setAlignment(Qt.AlignCenter)
+                sep.setStyleSheet("color: #555;")
+                bit_layout.addWidget(sep, row, col + 1)
+
         layout.addWidget(bit_group)
 
         ops_group = QGroupBox("Operations")
@@ -66,8 +84,6 @@ class BitToolPanel(QWidget):
         layout.addWidget(QLabel("Results:"))
         layout.addWidget(self._result_output)
 
-        self._current_value = 0
-
     def _get_value(self) -> int:
         text = self._value_input.text().strip()
         base = self._input_base.currentText()
@@ -92,9 +108,20 @@ class BitToolPanel(QWidget):
             if i < bits:
                 state = (self._current_value >> i) & 1
                 self._bit_buttons[i].setText(str(state))
-                self._bit_buttons[i].setStyleSheet(
-                    "background-color: #4CAF50; color: white;" if state else ""
-                )
+                if state:
+                    if i >= bits - 8:
+                        color = "#e53935"
+                    elif i >= bits - 16:
+                        color = "#ff9800"
+                    else:
+                        color = "#4CAF50"
+                    self._bit_buttons[i].setStyleSheet(
+                        f"background-color: {color}; color: white; font-weight: bold;"
+                    )
+                else:
+                    self._bit_buttons[i].setStyleSheet(
+                        "background-color: #2a2a3a; color: #666;"
+                    )
             else:
                 self._bit_buttons[i].setText("-")
                 self._bit_buttons[i].setStyleSheet("")
@@ -103,7 +130,6 @@ class BitToolPanel(QWidget):
         if bit >= self._word_size.value():
             return
         self._current_value ^= (1 << bit)
-        self._value_input.setText(str(self._current_value))
         self._refresh_bits()
         self._update_output()
 
@@ -144,7 +170,6 @@ class BitToolPanel(QWidget):
             return
 
         self._current_value = val
-        self._value_input.setText(str(val))
         self._refresh_bits()
         self._update_output()
 
@@ -172,16 +197,19 @@ class BitToolPanel(QWidget):
                 mask |= (1 << i)
             self._result_output.setText(f"Mask: 0x{mask:X}\nBits {s}-{e}")
             self._current_value = mask
-            self._value_input.setText(str(mask))
             self._refresh_bits()
+            self._update_output()
 
     def _update_output(self) -> None:
         val = self._current_value
         bits = self._word_size.value()
+        self._value_input.setText(str(val))
+        signed = val if val < (1 << (bits - 1)) else val - (1 << bits)
         text = (
-            f"Dec: {val}\n"
-            f"Hex: 0x{val:X}\n"
-            f"Bin: {val:0{bits}b}\n"
-            f"Bits: {val.bit_count()}"
+            f"Dec:      {val}\n"
+            f"Hex:      0x{val:0{bits // 4}X}\n"
+            f"Bin:      {val:0{bits}b}\n"
+            f"Signed:   {signed}\n"
+            f"Bit count: {val.bit_count()}"
         )
         self._result_output.setText(text)

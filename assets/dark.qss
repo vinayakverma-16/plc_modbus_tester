@@ -192,3 +192,109 @@ QScrollBar::handle:vertical {
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
     height: 0px;
 }
+
+/* Dock widget improvements */
+QDockWidget {
+    titlebar-close-icon: none;
+    font-weight: bold;
+}
+QDockWidget::title {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #2a2d3a, stop:1 #1e2130);
+    padding: 5px 8px;
+    border-bottom: 2px solid #3d86c6;
+}
+QMainWindow::separator {
+    background: #3d5a80;
+    width: 5px;
+    height: 5px;
+}
+QMainWindow::separator:hover {
+    background: #5ba3e0;
+    cursor: SizeHorCursor;
+}
+
+/* Table improvements */
+QTableWidget {
+    gridline-color: #2a2d3a;
+    selection-background-color: #2a4a6b;
+    alternate-background-color: #1a1d2e;
+}
+QTableWidget::item:selected {
+    background-color: #2a4a6b;
+    color: #cdd6f4;
+}
+QHeaderView::section {
+    background-color: #2a2d3a;
+    padding: 4px 8px;
+    border: none;
+    border-right: 1px solid #3d3f50;
+    border-bottom: 2px solid #3d86c6;
+    font-weight: bold;
+}
+QHeaderView::section:hover {
+    background-color: #3d3f50;
+}
+
+/* Splitter / separator visible handles */
+QSplitter::handle {
+    background: #3d5a80;
+    border-radius: 2px;
+}
+QSplitter::handle:horizontal { width: 5px; }
+QSplitter::handle:vertical   { height: 5px; }
+QSplitter::handle:hover { background: #5ba3e0; }
+
+/* Group box styling */
+QGroupBox {
+    border: 1px solid #3d3f50;
+    border-radius: 4px;
+    margin-top: 8px;
+    font-weight: bold;
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 4px;
+    color: #89b4fa;
+}
+
+/* Tab bar */
+QTabBar::tab {
+    padding: 5px 12px;
+    border: 1px solid #3d3f50;
+    border-bottom: none;
+    border-radius: 3px 3px 0 0;
+    background: #1e1e2e;
+}
+QTabBar::tab:selected {
+    background: #2a2d3a;
+    color: #89b4fa;
+    border-bottom: 2px solid #3d86c6;
+}
+QTabBar::tab:hover:!selected {
+    background: #2a2d3a;
+}
+
+/* Toolbar buttons */
+QToolBar QPushButton {
+    padding: 4px 12px;
+    border: 1px solid #3d3f50;
+    border-radius: 3px;
+    min-width: 90px;
+}
+QToolBar QPushButton:hover {
+    background: #3d3f50;
+    border-color: #5ba3e0;
+}
+QToolBar QPushButton:checked, QToolBar QPushButton:pressed {
+    background: #2a4a6b;
+    border-color: #3d86c6;
+    color: #89b4fa;
+}
+
+/* Status bar */
+QStatusBar {
+    background: #131420;
+    border-top: 1px solid #3d3f50;
+}

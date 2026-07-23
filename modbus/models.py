@@ -122,3 +122,4 @@ class ConnectionStats:
     errors: int = 0
     last_error: str = ""
     connected: bool = False
+    latency_ms: float = 0.0
