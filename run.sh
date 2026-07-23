@@ -10,4 +10,10 @@ if [ ! -d venv ]; then
 fi
 
 source venv/bin/activate
+
+if ! python -c "import PySide6" 2>/dev/null; then
+    echo "Dependencies not installed. Run install.sh first."
+    exit 1
+fi
+
 exec python main.py "$@"

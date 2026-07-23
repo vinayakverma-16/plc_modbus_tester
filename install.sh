@@ -89,10 +89,21 @@ echo "Installing dependencies..."
 pip install -r requirements.txt
 
 echo ""
-echo "========================================="
-echo "Installation complete!"
-echo "Run the application with:"
-echo "  ./run.sh"
-echo "  OR"
-echo "  source venv/bin/activate && python main.py"
-echo "========================================="
+echo "Verifying installation..."
+if python -c "import PySide6; print(f'PySide6 {PySide6.__version__}')" && \
+   python -c "import pymodbus; print(f'pymodbus {pymodbus.__version__}')" && \
+   python -c "import serial; print(f'pyserial {serial.__version__}')"; then
+    echo ""
+    echo "========================================="
+    echo "Installation complete!"
+    echo "Run the application with:"
+    echo "  ./run.sh"
+    echo "  OR"
+    echo "  source venv/bin/activate && python main.py"
+    echo "========================================="
+else
+    echo ""
+    echo "ERROR: Some dependencies failed to install."
+    echo "Try running: pip install -r requirements.txt"
+    exit 1
+fi
