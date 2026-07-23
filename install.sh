@@ -29,6 +29,10 @@ install_pyenv_python() {
     fi
 
     if ! command -v pyenv &>/dev/null; then
+        if [ -d "$HOME/.pyenv" ]; then
+            echo "Removing incomplete pyenv installation..."
+            rm -rf "$HOME/.pyenv"
+        fi
         echo "Installing pyenv..."
         sudo apt install -y make build-essential libssl-dev zlib1g-dev \
             libbz2-dev libreadline-dev libsqlite3-dev wget curl \
