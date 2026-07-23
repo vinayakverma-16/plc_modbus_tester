@@ -25,7 +25,8 @@ class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("PLC Test Utility")
-        self.resize(1400, 900)
+        self.setMinimumSize(800, 600)
+        self.showMaximized()
 
         self._client = ModbusClient()
         self._session_mgr = SessionManager()

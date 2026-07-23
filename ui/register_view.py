@@ -56,7 +56,7 @@ class RegisterView(QWidget):
         self._table.setSelectionMode(QAbstractItemView.SingleSelection)
         self._table.setEditTriggers(QAbstractItemView.DoubleClicked)
         self._table.horizontalHeader().setStretchLastSection(True)
-        self._table.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
+        self._table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self._table.verticalHeader().setVisible(False)
         self._table.setAlternatingRowColors(True)
         layout.addWidget(self._table)

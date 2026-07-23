@@ -39,7 +39,7 @@ class PacketMonitor(QWidget):
         self._table.setHorizontalHeaderLabels(self.COLUMNS)
         self._table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self._table.horizontalHeader().setStretchLastSection(True)
-        self._table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self._table.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
         self._table.verticalHeader().setVisible(False)
         self._table.setAlternatingRowColors(True)
         layout.addWidget(self._table)
